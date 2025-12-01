@@ -3,12 +3,12 @@ import Input from "./Input";
 import "./../../style/connexion.css"
 
 export default function Connexion() {
-  const [name, setName] = useState("");
-  const [pwd, setPwd] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    console.log("Connexion :", { name, pwd });
+    console.log("Connexion :", { username, password });
   }
 
   function handleGuest() {
@@ -25,18 +25,18 @@ export default function Connexion() {
             <Input
               type="text"
               placeholder="name"
-              value={name}
+              value={username}
               label="User:"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="login-input-group">
             <Input
               type="password"
               placeholder="••••••"
-              value={pwd}
+              value={password}
               label="Mot de Passe:"
-              onChange={(e) => setPwd(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
@@ -48,7 +48,7 @@ export default function Connexion() {
         <div className="divider">ou</div>
 
         <button className="guest-btn" onClick={handleGuest}>
-          Se connecter en tant qu’invité
+          Continuer en tant qu’invité
         </button>
       </div>
     </div>
