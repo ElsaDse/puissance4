@@ -1,24 +1,18 @@
-import { useEffect, useState } from "react";
 import PlayerInfo from "./PlayerInfo.tsx";
 import type { Player, PlayerID } from "../../utils/types.ts";
 
 type GameHeaderProps = {
   players: Player[];
   currentPlayer: PlayerID;
+  timer: string;
 }
 
-export function GameHeader({ players, currentPlayer }: GameHeaderProps) {
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
+export function GameHeader({ players, currentPlayer, timer }: GameHeaderProps) {
 
   return (
     <div className="game-header">
       <div className="timer">
-        <h2>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</h2>
+        <h2>{timer}</h2>
       </div>
     
       <div className="players">

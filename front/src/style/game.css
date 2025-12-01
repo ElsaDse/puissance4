@@ -69,6 +69,7 @@
   to { transform: scale(1.2); }
 }
 
+
 /* GRID */
 .grid{
   position: relative;
@@ -140,12 +141,86 @@
   margin-bottom: 2rem;
 }
 
-/* 📱 Responsive */
-@media (max-width: 600px) {
-  .board {
-    max-width: 90vw;
+
+/*VICTORY*/
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+  animation: popup-appear .25s ease-out;
+}
+
+.popup-title {
+  font-size: 1.8rem;
+  margin-bottom: .6rem;
+}
+
+.popup-text {
+  font-size: 1.2rem;
+  margin-bottom: .6rem;
+}
+
+.popup-duration {
+  color: #555;
+  margin-bottom: 1.4rem;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.popup-btn {
+  padding: .7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.popup-btn.replay {
+  background: #1EC773;
+  color: white;
+}
+
+.popup-btn.quit {
+  background: #d63031;
+  color: white;
+}
+
+.popup-btn:hover {
+  transform: scale(1.05);
+}
+
+/* animation d’apparition */
+@keyframes popup-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  .player-name {
-    font-size: .9rem;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+
+
+
