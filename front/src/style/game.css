@@ -1,0 +1,151 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  height: 100vh;
+}
+
+.game-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.timer {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.players {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  max-width: 400px; 
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: bold;
+  opacity: .6;
+}
+
+.player-info.active {
+  opacity: 1;
+  animation: blink .6s infinite alternate;
+}
+
+
+.cell-yellow{
+  background-color: #f6db38;
+  box-shadow:inset 0 0 0 3px #a79114 ;
+  border: solid 3px #f6db38 ;
+  outline: solid 1px #a79114;
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+}
+
+.cell-red{
+  background-color: #f63848;
+  box-shadow:inset 0 0 0 3px #952e36 ;
+  border: solid 3px #f63848 ;
+  outline: solid 1px #952e36;
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+}
+
+@keyframes blink {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
+}
+
+/* GRID */
+.grid{
+  position: relative;
+  width: 90vw;
+  max-width: 600px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr) ;
+  grid-template-rows: repeat(var(--rows), 1fr) ;
+  aspect-ratio: var(--cols)/ var(--rows);
+  background-color:#336dac ;
+  background: radial-gradient(
+    circle, 
+    transparent, 
+    transparent 50%, 
+    #336dac 51%,
+    #255283 60%,
+    #336dac 100%) ;
+  background-size: calc(100%/ var(--cols)) calc(100%/ var(--rows));
+  border: 15px solid #255283  ;
+  place-items: center;
+  margin: 0 auto;
+  place-content: center;
+}
+
+
+.grid .cell-red,.grid .cell-yellow{
+    width: 70%;
+    height: 70%;
+}
+
+.columns{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.column{
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: calc(100% + 100% / var(--rows));
+}
+
+.column:hover{
+    opacity: 1;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* QUIT */
+.quit-btn {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: .8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: auto;
+  margin-bottom: 2rem;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .board {
+    max-width: 90vw;
+  }
+  .player-name {
+    font-size: .9rem;
+  }
+}
