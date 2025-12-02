@@ -1,0 +1,145 @@
+.home-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* HEADER */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.user-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.logout-btn {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: .6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* JOIN */
+.join-section {
+  display: flex;
+  gap: 1rem;
+}
+
+.join-section input {
+  flex: 1;
+  padding: .7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.join-section button {
+  padding: .7rem 1.2rem;
+  border: none;
+  background: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* OPTIONS */
+.options{
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.options-section {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  padding: 1.2rem;
+  border-radius: 10px;
+  background: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.card.disabled {
+  opacity: 0.5;
+  pointer-events: none; 
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0077ff; /* couleur du radio */
+  cursor: pointer;
+}
+
+/* CREATE GAME */
+.create-btn {
+  margin-top: .8rem;
+  padding: .9rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* STATS */
+.stats-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats-section th,
+.stats-section td {
+  padding: .8rem;
+  text-align: center;
+}
+
+.stats-section tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .options {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .options-section {
+    width: 100%;
+  }
+}
