@@ -1,17 +1,40 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Input from "./Input";
 import "./../../style/connexion.css"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Connexion() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
-    console.log("Connexion :", { username, password });
+    if (!username.trim() || !password.trim()) {
+      alert("Veuillez remplir tous les champs");
+      return;
+    }
+    try {
+      const res = await axios.post('http://localhost:4000/auth/login', { username, password });
+      const user = res.data.user;
+      localStorage.setItem('user', JSON.stringify(user)); // garde session
+      navigate('/home');
+    } catch (err) {
+      console.error(err);
+    }
+    console.log("Connexion...");
   }
 
-  function handleGuest() {
+  async function handleGuest() {
+    try {
+      const res = await axios.post('http://localhost:4000/auth/guest', {});
+      const user = res.data.user;
+      localStorage.setItem('user', JSON.stringify(user)); // garde session
+      navigate('/home');
+    } catch (err) {
+      console.error(err);
+    }
     console.log("Connexion en invité");
   }
 
@@ -39,14 +62,11 @@ export default function Connexion() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
           <button className="login-btn" type="submit">
             Se connecter
           </button>
         </form>
-
         <div className="divider">ou</div>
-
         <button className="guest-btn" onClick={handleGuest}>
           Continuer en tant qu’invité
         </button>

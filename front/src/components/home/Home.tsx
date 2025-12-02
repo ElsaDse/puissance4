@@ -5,31 +5,33 @@ import { SectionModeJeu } from "./SectionModeJeu";
 import { SectionStats } from "./SectionStats";
 import './../../style/home.css'
 
-/*type PlayerStat= {
-  username: string;
-  games: number;
-  wins: number;
-  avgTime: string; // format 00:00
-}*/
+export function Home(){
 
-type HomeProps= {
-  player: Player;
-  /*stats: PlayerStat[];
-  onLogout: () => void;
-  onJoin: (id: string) => void;
-  onCreate: () => void;*/
-}
+  const stored = localStorage.getItem("user");
+  let user: Player | null = null;
+  if (stored) {
+    try {
+      const storedUser = JSON.parse(stored);
+      user = {
+        id: storedUser.id,
+        name: storedUser.username, // ou .name selon ton type Player
+      };
+    } catch (e) {
+      console.error("Erreur lors du parsing de l'utilisateur depuis localStorage", e);
+      // Optionnel : nettoyer un localStorage corrompu
+      localStorage.removeItem("user");
+    }
+  }
+   
 
-export function Home({player}:HomeProps){
-
-    return(
-        <>
-            <div className="div home-container">
-                <HomeHeader player={player}/>
-                <SectionJoin/>
-                <SectionModeJeu/>
-                <SectionStats/>
-                </div>
-        </>
-    )
+  return(
+    <>
+      <div className="div home-container">
+        <HomeHeader player={user!}/>
+        <SectionJoin/>
+        <SectionModeJeu/>
+        <SectionStats/>
+      </div>
+    </>
+   )
 }
