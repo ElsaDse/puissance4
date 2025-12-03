@@ -1,0 +1,38 @@
+# Ignorer les node_modules partout
+**/node_modules/
+
+# Ignorer les build / bundle front & back
+**/dist/
+**/dist-ssr/
+**/build/
+
+# Ignorer les logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Ignorer fichiers temporaires / locaux
+*.local
+
+#  Ignorer fichiers système
+.DS_Store
+
+#  IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+#Windows
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignorer environnements secrets
+.env
+.env.*

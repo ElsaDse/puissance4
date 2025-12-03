@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                     // version JS générée
+    "module": "ESNext",                     // pour ESM (import/export)
+    "moduleResolution": "node",             // résout les modules Node
+    "esModuleInterop": true,                // support import default
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "strict": true,                         // active toutes les vérifications TS
+    "skipLibCheck": true,                   // ignore certains fichiers de type
+    "outDir": "./dist",                      // build folder
+    "rootDir": "./src",                      // dossier source
+    "resolveJsonModule": true,               // permet d'importer des JSON
+    "types": ["node"]                        // types Node
+  },
+  "include": ["src"],                        // tout ce qui est dans src/
+  "exclude": ["node_modules", "dist"]
+}

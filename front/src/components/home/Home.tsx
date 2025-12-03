@@ -5,27 +5,21 @@ import { SectionModeJeu } from "./SectionModeJeu";
 import { SectionStats } from "./SectionStats";
 import './../../style/home.css'
 
-/*type PlayerStat= {
-  username: string;
-  games: number;
-  wins: number;
-  avgTime: string; // format 00:00
-}*/
 
-type HomeProps= {
-  player: Player;
-  /*stats: PlayerStat[];
-  onLogout: () => void;
-  onJoin: (id: string) => void;
-  onCreate: () => void;*/
-}
 
-export function Home({player}:HomeProps){
+export function Home(){
+
+  let user: Player|null= null
+  const stored = localStorage.getItem("user");
+  if(stored){
+    const stored_user =JSON.parse(stored)
+    user= {id: stored_user.id, name: stored_user.username}
+  }
 
     return(
         <>
             <div className="div home-container">
-                <HomeHeader player={player}/>
+                <HomeHeader player={user!}/>
                 <SectionJoin/>
                 <SectionModeJeu/>
                 <SectionStats/>
