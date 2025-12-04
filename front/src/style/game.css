@@ -127,6 +127,19 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+.grid.blocked {
+    pointer-events: none;
+}
+
+.grid.blocked .column {
+    cursor: not-allowed;
+}
+
+.grid.blocked .cell:hover {
+    background: none !important;
+}
+
+
 
 /* QUIT */
 .quit-btn {

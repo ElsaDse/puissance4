@@ -6,6 +6,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
     // Login ou création automatique
     fastify.post('/login', async (request, reply) => {
+        console.log("BODY: ", request.body)
         const { username, password } = request.body as { username: string; password: string };
         try{
             const res = await pool.query(

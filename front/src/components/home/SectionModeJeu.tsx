@@ -1,17 +1,25 @@
 import { useState } from "react";
 import { SectionDifficulty } from "./SectionDifficulty";
+import CreateGamePopup from "./CreateGamePopup";
 
-/*type SectionModeJeuProps={
-    mode?: "pvp"|"ia",
-    onCreateGame: ()=>void
-}*/
 
 export function SectionModeJeu(){
    
-   const [mode, setMode] = useState("")
+   const [mode, setMode] = useState<"pvp" | "ia" | "">("")
+   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
    const onCreateGame=()=>{
-    console.log('partie créée')
+        if (mode === "pvp") {
+        setIsPopupOpen(true);
+        } else if (mode === "ia") {
+        console.log("Partie contre l'IA créée !");
+        } else {
+        alert("Veuillez d'abord choisir un mode de jeu");
+        }
+   }
+
+   const closePopup=()=>{
+        setIsPopupOpen(false);
    }
    
     return(
@@ -37,6 +45,7 @@ export function SectionModeJeu(){
                 <button className="create-btn" onClick={onCreateGame}>
                     ➕ Créer une partie
                 </button>
+                {mode==="pvp" && isPopupOpen&& <CreateGamePopup onClose={closePopup}/>}
                 </div>
             </section>
             <SectionDifficulty disable={mode==="pvp"}/>
