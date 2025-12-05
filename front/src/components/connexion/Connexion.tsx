@@ -1,18 +1,41 @@
 import { useState } from "react";
 import Input from "./Input";
 import "./../../style/connexion.css"
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Connexion() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate= useNavigate()
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    console.log("Connexion :", { username, password });
+    if (!username.trim() || !password.trim()) {
+      alert("Veuillez remplir tous les champs");
+      return;
+    }
+    try {
+      const res = await axios.post('http://localhost:4000/auth/login', { 
+        username, password 
+      });
+      const user = res.data.user;
+      localStorage.setItem('user', JSON.stringify(user));
+      navigate('/home');
+    } catch (err) {
+      console.log(err)
+    }
   }
 
-  function handleGuest() {
-    console.log("Connexion en invité");
+  async function handleGuest() {
+    try {
+      const res = await axios.post('http://localhost:4000/auth/guest');
+      const user = res.data.user;
+      localStorage.setItem('user', JSON.stringify(user)); // garde session
+      navigate('/home');
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
