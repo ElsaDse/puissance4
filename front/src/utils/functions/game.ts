@@ -99,3 +99,8 @@ export function winningPosition(grid: GridState, color: PlayerColor, x:number, y
 }
 
 
+
+export function isGridFull(grid: CellState[][]): boolean {
+  return grid.every(row => row.every(cell => cell !== "E"));
+}
+

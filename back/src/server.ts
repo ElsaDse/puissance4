@@ -30,7 +30,8 @@ app.ready(()=>{
     origin: true,           
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
-  },
+    },
+    allowEIO3: true,
   });
   initGameSockets(io);
   console.log("socket.io initialisé")

@@ -21,24 +21,25 @@ export default function CreateGamePopup({onClose}: CreateGamePopupProps) {
   const host_user_id= stored_user.id
   const opponent_color= findOponentColor(color!)
 
-  useEffect(()=>{
-    if(!waiting || !gameId) return;
-    if(!socket.connected){
-        socket.connect()
-    }
-    socket.emit("host_join_room", gameId);
+    // écouter player_joined
+    useEffect(()=>{
+        if (!waiting || !gameId) return;
 
-    socket.on("player_joined", () => {
-      console.log("Un joueur a rejoint ! Redirection...");
-      navigate("/game");
-    });
-    return () => {
-        socket.off("player_joined", () => {
+        if(!socket.connected){
+            socket.connect()
+        }
+        const handlePlayerJoined = () => {
             console.log("Un joueur a rejoint ! Redirection...");
+            localStorage.setItem('game', JSON.stringify({id: gameId}));
             navigate("/game");
-        });
-    };
-  },[waiting, gameId, navigate])
+        }
+        socket.emit("host_join_room", gameId);
+        socket.on("player_joined", handlePlayerJoined);
+        return () => {
+            socket.off("player_joined", handlePlayerJoined);
+        };
+    },[gameId, waiting, navigate])
+
 
   async function createGame() {
     try{

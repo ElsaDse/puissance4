@@ -18,7 +18,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
                 try{
                     //créer un utilisateur
                     const createRes = await pool.query(
-                        'INSERT INTO users(username, password_hash) VALUES($1, $2) RETURNING id, username',
+                        'INSERT INTO users(username, password_hash) VALUES($1, $2) RETURNING id, username, is_guest',
                         [username, password ]
                     );
                     return { user: createRes.rows[0] };
@@ -37,7 +37,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         try{
             const username = `guest_${Math.floor(Math.random() * 10000)}`;
             const res = await pool.query(
-                'INSERT INTO users(username, is_guest) VALUES($1, TRUE) RETURNING id, username',
+                'INSERT INTO users(username, is_guest) VALUES($1, TRUE) RETURNING id, username, is_guest',
                 [username]
             );
             return { user: res.rows[0] };

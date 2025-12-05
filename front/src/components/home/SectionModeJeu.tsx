@@ -8,6 +8,10 @@ export function SectionModeJeu(){
    const [mode, setMode] = useState<"pvp" | "ia" | "">("")
    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+   const stored = localStorage.getItem("user");
+   const stored_user =JSON.parse(stored!)
+   const is_guest= stored_user.is_guest
+
    const onCreateGame=()=>{
         if (mode === "pvp") {
         setIsPopupOpen(true);
@@ -30,7 +34,7 @@ export function SectionModeJeu(){
                 <h3>Mode de jeu</h3>
                 <div className="radio-group">
                     <label>
-                        <input type="radio" name="mode" value="pvp"
+                        <input type="radio" name="mode" value="pvp"  disabled={is_guest}
                             checked={mode === "pvp"}
                             onChange={() => setMode("pvp")}/>
                         1 vs 1
