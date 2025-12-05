@@ -5,14 +5,22 @@ import { GameHeader } from "./GameHeader.tsx";
 import { Grid } from "./Grid.tsx";
 import { canDropTokens, dropTokensAction, findCurrentPlayer, findFreePositionY, formatTime, switchPlayer, winningPosition } from "../../utils/functions/game.ts";
 import { VictoryPopup } from "./VictoryPopup.tsx";
+import socket from "../../utils/socket.ts";
 
-
+if(!socket.connected){
+  socket.connect()
+}
 
 export function Game() {
+
     const align: number=4
     const [grid, setGrid] = useState<CellState[][]>(
         Array.from({ length: 6 }, () => Array(7).fill("E"))
     );
+    const stored = localStorage.getItem("user");
+    const localUser = JSON.parse(stored!);
+    const localPlayerId = localUser.id;
+
     const players: Player[]=[
       {id:1, name:"Player1", color:'R'},
       {id:2, name:"Player2", color:'Y'},
@@ -23,23 +31,36 @@ export function Game() {
     const [duration, setDuration] = useState("00:00");
 
 
+    //winner
     useEffect(() => {
       if(winner!==undefined) return;
       const seconds = setInterval(() => setTimer((s) => s + 1), 1000);
       return () => clearInterval(seconds);
     }, [winner]);
 
+    //socket.io
+    useEffect(()=>{
+      socket.on("start_game", ({starterUserId})=>{
+        setCurrentPlayer(starterUserId)
+      })
+    }, [])
+
     const onDropToken=(x:number)=>{
-        if(canDropTokens(grid, x)){
-            setGrid(dropTokensAction(grid, x, currentPlayer, players))
-            const player= findCurrentPlayer(players, currentPlayer)
-            const positions=winningPosition(grid, player!.color!, x, findFreePositionY(grid, x), align)
-            if(positions!== undefined){
-              setWinner(player)
-              setDuration(formatTime(timer))
-            }
-            setCurrentPlayer(switchPlayer(currentPlayer, players))
+      if(localPlayerId!= currentPlayer){
+        console.warn("pas ton tour")
+        return;
+      }
+
+      if(canDropTokens(grid, x)){
+        setGrid(dropTokensAction(grid, x, currentPlayer, players))
+        const player= findCurrentPlayer(players, currentPlayer)
+        const positions=winningPosition(grid, player!.color!, x, findFreePositionY(grid, x), align)
+        if(positions!== undefined){
+          setWinner(player)
+          setDuration(formatTime(timer))
         }
+          setCurrentPlayer(switchPlayer(currentPlayer, players))
+      }
     }
 
     const restartGame=()=>{
@@ -52,8 +73,15 @@ export function Game() {
 
   return (
     <div className="game-container">
-      <GameHeader players={players} currentPlayer={currentPlayer} timer={formatTime(timer)} />
-      <Grid grid={grid} color={findCurrentPlayer(players, currentPlayer)!.color} onDrop={onDropToken} />
+      <GameHeader players={players} 
+        currentPlayer={currentPlayer}
+        timer={formatTime(timer)} 
+      />
+      <Grid grid={grid} 
+        color={findCurrentPlayer(players, currentPlayer)!.color} 
+        onDrop={onDropToken} 
+        canPlay={currentPlayer === localPlayerId}
+      />
       <QuitButton />
 
       {winner!==undefined && (

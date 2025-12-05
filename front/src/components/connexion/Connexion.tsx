@@ -19,6 +19,7 @@ export default function Connexion() {
       const res = await axios.post('http://localhost:4000/auth/login', { 
         username, password 
       });
+      console.log('connecté en login')
       const user = res.data.user;
       localStorage.setItem('user', JSON.stringify(user));
       navigate('/home');
@@ -29,6 +30,7 @@ export default function Connexion() {
 
   async function handleGuest() {
     try {
+      console.log('connecté en invité')
       const res = await axios.post('http://localhost:4000/auth/guest');
       const user = res.data.user;
       localStorage.setItem('user', JSON.stringify(user)); // garde session

@@ -7,17 +7,20 @@ import { findColor } from "../../utils/functions/game.ts"
 type GridProps={
     grid:GridState,
     color?: PlayerColor,
+    canPlay?: boolean,
     onDrop?: (x:number)=>void,
 }
 
 
-export function Grid({grid, color, onDrop}:GridProps){
+export function Grid({grid, color, onDrop, canPlay}:GridProps){
     const cols= grid[0].length 
     const showColumns= color && onDrop
 
     return(
         <>
-            <div className="grid" style={{'--rows': grid.length, '--cols':cols} as CSSProperties}>
+            <div className={`grid ${!canPlay ? "blocked" : ""}`}
+                style={{'--rows': grid.length, '--cols':cols} as CSSProperties}
+            >
                 {grid.map((row, y)=>row.map((color, x)=>
                     <Cell y={y} color={color} key={`${x}-${y}`}/>
                 ))}
