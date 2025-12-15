@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import type { Player } from "../../utils/types.ts"
 
 type HomeHeaderProps={
@@ -7,8 +8,10 @@ type HomeHeaderProps={
 
 export function HomeHeader({player}: HomeHeaderProps){
 
+    const navigate= useNavigate()
     const onLogout=()=>{
-        console.log(`joueur déconnecté`)
+        localStorage.removeItem('user');
+        navigate('/')
     }
 
     return(

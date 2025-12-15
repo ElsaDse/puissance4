@@ -16,17 +16,19 @@ export function SectionJoin(){
     async function onJoin(){
         if(!roomId) return;
         try{
-            const res= await axios.put('http://localhost:4000/game/join',{
+            const res = await axios.put('http://localhost:4000/game/join',{
                 game_id:roomId,
                 oponent_user_id: oponent_user_id
             })
-            const starterUserId = res.data.currentPlayer;
-            if (!socket.connected) {
-                socket.connect();
-            }
-            socket.emit("opponent_join_room", {gameId:roomId, starterUserId});
-            navigate('/game')
-
+            if(res.status===200){
+                if (!socket.connected) {
+                    socket.connect();
+                }
+                socket.emit("opponent_join_room", {gameId:roomId});
+                localStorage.setItem('game', JSON.stringify({ id: roomId }));
+                navigate('/game');
+            }  
+            
         } catch(err){
             console.log(err)
         }

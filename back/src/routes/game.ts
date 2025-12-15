@@ -51,14 +51,15 @@ export const gameRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     fastify.get("/players", async (req, reply)=>{
-         const game_id = Number((req.query as { game_id: string }).game_id);
-        //const  {game_id} = req.body as {game_id:number};
+        const game_id = Number((req.query as { game_id: string }).game_id);
         try{
             const res = await pool.query(
                 `
                     SELECT 
+                        games.mode, 
+                        game_settings.starter_user_id,
                         users.id,
-                        users.username AS name,
+                        users.username,
                         CASE 
                             WHEN users.id = games.host_user_id THEN game_settings.player1_color
                             WHEN users.id = games.opponent_user_id THEN game_settings.player2_color
@@ -73,10 +74,22 @@ export const gameRoutes: FastifyPluginAsync = async (fastify) => {
             if(res.rows.length===0){
                 return reply.status(404).send({ error: "Partie non trouvé" });
             }
-            return reply.send({ players: res.rows });
+            const players=res.rows.map(row =>({
+                id: row.id,
+                name: row.username,
+                color: row.color,
+            }))
+            const mode = res.rows[0].mode;
+            const starter_user_id = res.rows[0].starter_user_id;
+            
+            return reply.send({ 
+                players: players, 
+                starterPlayer: starter_user_id,
+                mode: mode 
+            });
         } catch(err){
             console.error(err);
         }
-    })
+    });
 
 }
