@@ -9,6 +9,7 @@ import axios from "axios";
 import socket from "../../utils/socket.ts";
 import { GameOverPopup } from "./GameOverPopup.tsx";
 import { useNavigate } from "react-router-dom";
+import { QuitConfirmationModal } from "./QuitConfirmationModal.tsx";
 
 
 
@@ -34,6 +35,7 @@ export function Game() {
     const [duration, setDuration] = useState("00:00");
     const [isDraw, setIsDraw] = useState<boolean>(false);
     const [gameMode, setGameMode] = useState<'pvp' | 'ia'>(); 
+    const [showQuitConfirm, setShowQuitConfirm] = useState(false);
 
     // Memo pour éviter de refaire la recherche à chaque render
     const currentPlayerObj = useMemo(
@@ -50,25 +52,36 @@ export function Game() {
     }, [winner]);
 
 
-    //api
+    //api 
     useEffect(()=>{
       if(!gameId) return;
 
-      async function fetchPlayers() {
+      async function loadGame() {
         try {
-          const res = await axios.get(`http://localhost:4000/game/players?game_id=${gameId}`);
+          const res = await axios.get(`http://localhost:4000/game/state?game_id=${gameId}`);
           setPlayers(res.data.players);
-          setCurrentPlayer(res.data.starterPlayer)
           setGameMode(res.data.mode)
+          if(res.data.starterPlayer) {
+            setCurrentPlayer(res.data.starterPlayer)
+          } else setCurrentPlayer(res.data.currentPlayer)
+          if(res.data.grid) {
+            setGrid(res.data.grid)
+          }
+          if(res.data.mode === "ia"){
+            const humanPlayer = res.data.players.find((p:Player) => p.id === localPlayerId);
+            if(humanPlayer){
+              localStorage.setItem("hostColor", JSON.stringify({color:humanPlayer.color}));
+            }
+          }
         } catch (err) {
           console.error("Erreur récupération joueurs :", err);
         }
       }
-      fetchPlayers()
+      loadGame()
   
     }, [gameId])
 
-
+    
     //socket : Ecoute les coups de l'adversaire
     useEffect(()=>{
       if(!gameId) return;
@@ -116,8 +129,44 @@ export function Game() {
     }, [gameId, grid, timer, players ])
 
 
+    //play ia
+    useEffect(() => {
+      if(gameMode !== "ia") return;
+      if(currentPlayer !== -1) return; // pas le tour IA
+      if (winner || isDraw) return;
+      const playIA = async () => {
+        const res = await axios.post("http://localhost:4000/game/play/ia", { gameId });
+        const newGrid= res.data.grid
+        const finished= res.data.finished
+        const result= res.data.result
+
+        setGrid(newGrid);
+
+        if(finished){
+          if (result === "loss") {
+          setWinner(players.find(p => p.id === -1));
+          setDuration(formatTime(timer)) 
+        } else if (result === "win") {
+          setWinner(players.find(p => p.id === localPlayerId)); 
+          setDuration(formatTime(timer))
+        } else if (result === "draw") {
+          setIsDraw(true);
+        }
+        return;
+        }
+        // passer au tour humain
+        setCurrentPlayer(localPlayerId)
+      }
+
+      const timer=setTimeout(playIA, 500) // petit délai pour UX
+      return () => clearTimeout(timer);
+    }, [currentPlayer, gameMode, grid, gameId, localPlayerId, players])
+
+
+
+
     //Jouer localement
-    const onDropToken=(x:number)=>{
+    const onDropToken= async (x:number)=>{
       if(localPlayerId!= currentPlayer){
         console.warn("pas ton tour")
         return;
@@ -127,51 +176,109 @@ export function Game() {
         return;
       }
 
-      if(canDropTokens(grid, x)){
-        //maj locale
-        const y= findFreePositionY(grid, x)
-        const newGrid =dropTokensAction(grid, x, currentPlayer!, players)
-        setGrid(newGrid)
-        //envoi coup au serveur
-        socket.emit("drop_token", {gameId, x, y, player_id: currentPlayer});
-        //si coup gagnant
-        const positions=winningPosition(grid, currentPlayerObj.color!, x, y, align)
-        if(positions!== undefined){
-          setWinner(currentPlayerObj)
-          setDuration(formatTime(timer))
-          socket.emit("game_over", {
-            gameId, 
-            winnerId: currentPlayerObj.id,
-            durationSeconds: timer,
-            isDraw
-          })
-        } else if(isGridFull(grid)){ //si partie perdue
-          setIsDraw(true)
-          socket.emit("game_over", {
-            gameId, 
-            winnerId:null,
-            durationSeconds: timer,
-            isDraw
-          })
+      if(gameMode==="pvp"){
+        if(canDropTokens(grid, x)){
+          //maj locale
+          const y= findFreePositionY(grid, x)
+          const newGrid =dropTokensAction(grid, x, currentPlayer!, players)
+          setGrid(newGrid)
+          //envoi coup au serveur
+          socket.emit("drop_token", {gameId, x, y, player_id: currentPlayer});
+          //si coup gagnant
+          const positions=winningPosition(grid, currentPlayerObj.color!, x, y, align)
+          if(positions!== undefined){
+            setWinner(currentPlayerObj)
+            setDuration(formatTime(timer))
+            socket.emit("game_over", {
+              gameId, 
+              winnerId: currentPlayerObj.id,
+              durationSeconds: timer,
+              isDraw
+            })
+          } else if(isGridFull(grid)){ //si partie perdue
+            setIsDraw(true)
+            socket.emit("game_over", {
+              gameId, 
+              winnerId:null,
+              durationSeconds: timer,
+              isDraw
+            })
+          }
+          //change de tour
+          setCurrentPlayer(switchPlayer(currentPlayer!, players))
         }
-        //change de tour
-        setCurrentPlayer(switchPlayer(currentPlayer!, players))
+      }
+
+      if(gameMode==="ia"){
+        if (winner || isDraw) return;
+        if(canDropTokens(grid, x)){
+          const y= findFreePositionY(grid, x)
+          const newGrid =dropTokensAction(grid, x, currentPlayer!, players)
+          setGrid(newGrid)
+          await axios.post("http://localhost:4000/game/move", {
+            gameId,
+            userId: currentPlayer,
+            col: x,
+            row: y
+          });
+          const positions=winningPosition(grid, currentPlayerObj.color!, x, y, align)
+          if(positions!== undefined){
+            setWinner(currentPlayerObj)
+            setDuration(formatTime(timer))
+            return;
+          } else if(isGridFull(grid)){ 
+            setIsDraw(true)
+            return;
+          }
+          //tour ia
+          setCurrentPlayer(-1)
+        }
       }
     }
 
 
-    const restartGame=()=>{
-      if(gameMode==='ia'){
-        setGrid(Array.from({ length: 6 }, () => Array(7).fill("E")))
-        setWinner(undefined)
-        setTimer(0)
-        setCurrentPlayer(undefined)
-        setIsDraw(false)
-        setDuration("00:00")
-      } else{
-        localStorage.removeItem('game');
-        navigate('/home')
-      } 
+    const restartGame = async () => {
+      if (gameMode !== "ia") {
+        quitGame();
+        return;
+      }
+
+      try {
+        // Sauvegarder les paramètres actuels
+        const gameData = JSON.parse(localStorage.getItem("game")!);
+        const { difficulty } = gameData; 
+        const host_color = JSON.parse(localStorage.getItem("hostColor")!);
+        const { color } = host_color; 
+
+        //  Créer une NOUVELLE partie 
+        const createRes = await axios.post("http://localhost:4000/game/create/ia", {
+          userId: localPlayerId,
+          difficulty: difficulty ,
+          color: color
+        });
+
+        //  Mettre à jour localStorage
+        localStorage.setItem('game', JSON.stringify(createRes.data));
+
+        // Reset et rechargement
+        setGrid(Array.from({ length: 6 }, () => Array(7).fill("E")));
+        setWinner(undefined);
+        setTimer(0);
+        setCurrentPlayer(undefined);
+        setIsDraw(false);
+        setDuration("00:00");
+
+        window.location.reload();
+
+      } catch (error) {
+        console.error("Erreur restart :", error);
+        setGrid(Array.from({ length: 6 }, () => Array(7).fill("E")));
+        setWinner(undefined);
+        setTimer(0);
+        setCurrentPlayer(undefined);
+        setIsDraw(false);
+        setDuration("00:00");
+      }
     }
 
 
@@ -180,11 +287,47 @@ export function Game() {
       navigate('/home')
     }
 
-    const leaveGame=()=>{
-      if(gameMode==='pvp'){
-        quitGame()
+    const leaveGame= async()=>{
+      if (gameMode !== "ia") {
+        quitGame();
+        return;
       }
+      if (winner || isDraw) {
+        quitGame();
+        return;
+      }
+      if(localUser.is_guest){
+        handleQuitWithoutSave()
+      }
+      setShowQuitConfirm(true);
     }
+
+    const handleSaveAndQuit = async () => {
+      try {
+        await axios.post("http://localhost:4000/game/save", { gameId });
+      } catch (err) {
+        console.error("Erreur sauvegarde :", err);
+      } finally {
+        setShowQuitConfirm(false);
+        quitGame();
+      }
+    };
+
+    const handleQuitWithoutSave = async () => {
+      try {
+        await axios.post("http://localhost:4000/game/delete", { gameId });
+        console.log("Partie supprimée de la base");
+      } catch (err) {
+        console.error("Erreur suppression :", err);
+      } finally {
+        setShowQuitConfirm(false);
+        quitGame();
+      }
+    };
+
+    const handleCancelQuit = () => {
+      setShowQuitConfirm(false);
+    };
 
     if (!gameId || players.length === 0 || !currentPlayerObj) {
       return <div className="game-container">Chargement de la partie...</div>;
@@ -199,11 +342,18 @@ export function Game() {
       <Grid grid={grid} 
         color={currentPlayerObj!.color} 
         onDrop={onDropToken} 
-        canPlay={currentPlayer === localPlayerId}
+        canPlay={currentPlayer === localPlayerId && !winner && !isDraw}
       />
       <QuitButton onQuit={leaveGame}/>
 
-      {winner!==undefined && (
+      <QuitConfirmationModal
+        isOpen={showQuitConfirm}
+        onSaveAndQuit={handleSaveAndQuit}
+        onQuitWithoutSave={handleQuitWithoutSave}
+        onCancel={handleCancelQuit}
+      />
+
+      {winner!==undefined && winner.id!==-1 && (
         <VictoryPopup
           winner={winner}
           duration={duration}
@@ -211,7 +361,7 @@ export function Game() {
           onQuit={quitGame}
         />
       )}
-      {isDraw&&(
+      {(isDraw || winner?.id===-1)&&(
         <GameOverPopup onClose={quitGame}/>
       )}
     </div>
