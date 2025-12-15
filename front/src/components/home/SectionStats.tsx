@@ -1,23 +1,36 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-/*type SectionStatsProps={
-    stats: {
-        username: string,
-        games: number,
-        wins: number,
-        avgTime: string,
-    }[]
-}*/
+type Stat={
+    username: string,
+    games: number,
+    wins: number,
+    avgTime: string,
+}
 
 export function SectionStats(){
+
+    const [stats, setStats] = useState<Stat[]>([]);
+    const [loading, setLoading] = useState(true);
    
-    const stats=[
-        {
-            username: "playeur1",
-            games: 12,
-            wins: 7,
-            avgTime: "06:27",
-        },
-    ]
+    useEffect(() => {
+        async function fetchStats() {
+        try {
+            const res = await axios.get("http://localhost:4000/game/stats");
+            setStats(res.data);
+        } catch (err) {
+            console.error("Erreur stats :", err);
+        } finally {
+            setLoading(false);
+        }
+        }
+        fetchStats();
+    }, []);
+
+    if (loading) {
+        return <p>Chargement des statistiques...</p>;
+    }
+   
 
     return(
         <>

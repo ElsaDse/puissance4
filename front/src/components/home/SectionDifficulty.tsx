@@ -1,12 +1,11 @@
-import { useState } from "react";
 
-/*type SectionDifficultyProps={
-    difficulty?: "easy"|"medium"| "hard",
-}*/
+type Props = {
+  disable: boolean;
+  difficulty: "easy" | "medium" | "hard" | "";
+  onChange: (value: "easy" | "medium" | "hard") => void;
+};
 
-export function SectionDifficulty({disable}:{disable:boolean}){
-   
-   const [difficulty, setDifficulty] = useState("");
+export function SectionDifficulty({ disable, difficulty, onChange }: Props){
    
     return(
         <>
@@ -17,19 +16,19 @@ export function SectionDifficulty({disable}:{disable:boolean}){
                     <label>
                         <input type="radio" name="difficulty" value="easy" disabled={disable}
                         checked={difficulty === "easy"}
-                        onChange={() => setDifficulty("easy")}/>
+                        onChange={() => onChange("easy")}/>
                         Facile
                     </label>
                     <label>
                         <input type="radio" name="difficulty" value="medium" disabled={disable}
                         checked={difficulty === "medium"}
-                        onChange={() => setDifficulty("medium")}/>
+                        onChange={() => onChange("medium")}/>
                         Moyen
                     </label>
                     <label>
                         <input type="radio" name="difficulty" value="hard" disabled={disable}
                         checked={difficulty === "hard"}
-                        onChange={() => setDifficulty("hard")}/>
+                        onChange={() => onChange("hard")}/>
                         Difficile
                     </label>
                 </div>

@@ -1,25 +1,56 @@
 import { useState } from "react";
 import { SectionDifficulty } from "./SectionDifficulty";
 import CreateGamePopup from "./CreateGamePopup";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 
 export function SectionModeJeu(){
    
    const [mode, setMode] = useState<"pvp" | "ia" | "">("")
    const [isPopupOpen, setIsPopupOpen] = useState(false);
+   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard" | "">("");
 
    const stored = localStorage.getItem("user");
    const stored_user =JSON.parse(stored!)
    const is_guest= stored_user.is_guest
 
-   const onCreateGame=()=>{
-        if (mode === "pvp") {
-        setIsPopupOpen(true);
-        } else if (mode === "ia") {
-        console.log("Partie contre l'IA créée !");
-        } else {
-        alert("Veuillez d'abord choisir un mode de jeu");
+   const navigate= useNavigate()
+
+   async function checkSavedGame() {
+        if(mode !== "ia" || difficulty=== "") return false
+        try{
+            const res = await axios.post("http://localhost:4000/game/create/ia", {userId:stored_user.id, color:"R", difficulty:difficulty});
+            if(res.data.resumed){
+                localStorage.setItem('game', JSON.stringify(res.data));
+                navigate("/game");
+                return true
+            }
+        } catch(err){
+            console.error(err)
         }
+        return false
+   }
+
+
+   const onCreateGame= async ()=>{
+        if (!mode) {
+            alert("Veuillez d'abord choisir un mode de jeu");
+            return;
+        }
+
+        if (mode === "ia" && !difficulty) {
+            alert("Veuillez choisir une difficulté");
+            return;
+        }
+
+        if (mode === "pvp") {
+            setIsPopupOpen(true);
+            return;
+        }
+        const hasSaved = await checkSavedGame();
+        if (hasSaved) return; 
+        setIsPopupOpen(true);
    }
 
    const closePopup=()=>{
@@ -49,10 +80,17 @@ export function SectionModeJeu(){
                 <button className="create-btn" onClick={onCreateGame}>
                     ➕ Créer une partie
                 </button>
-                {mode==="pvp" && isPopupOpen&& <CreateGamePopup onClose={closePopup}/>}
+                {isPopupOpen&& 
+                    <CreateGamePopup difficulty={difficulty} 
+                    onClose={closePopup}
+                    />
+                }
                 </div>
             </section>
-            <SectionDifficulty disable={mode==="pvp"}/>
+            <SectionDifficulty disable={mode==="pvp"}
+                difficulty={difficulty}
+                onChange={setDifficulty}
+            />
         </section>
         </>
     )

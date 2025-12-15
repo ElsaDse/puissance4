@@ -10,7 +10,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         const { username, password } = request.body as { username: string; password: string };
         try{
             const res = await pool.query(
-                'SELECT * FROM users WHERE username=$1 AND password_hash=$2',
+                'SELECT id, username, is_guest FROM users WHERE username=$1 AND password_hash=$2',
                 [username, password]
             );
 

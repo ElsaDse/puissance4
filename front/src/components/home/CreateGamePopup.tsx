@@ -6,11 +6,15 @@ import { useNavigate } from "react-router-dom";
 import socket from "../../utils/socket.ts";
 
 type CreateGamePopupProps={
-    onClose: ()=>void
+    difficulty: "easy" | "medium" | "hard"| "",
+    onClose: ()=>void,
+    /*onColorChange: (color: PlayerColor) => void,
+    color: PlayerColor,
+    userId: number*/
 }
 
 
-export default function CreateGamePopup({onClose}: CreateGamePopupProps) {
+export default function CreateGamePopup({difficulty, onClose}: CreateGamePopupProps) {
   const [color, setColor] = useState<PlayerColor>('R');
   const [waiting, setWaiting] = useState(false);
   const [gameId, setGameId] = useState<number>();
@@ -42,13 +46,23 @@ export default function CreateGamePopup({onClose}: CreateGamePopupProps) {
 
 
   async function createGame() {
-    try{
-        const res = await axios.post("http://localhost:4000/game/create", {host_user_id, color, opponent_color});
-        const game = res.data.game;
-        setGameId(game.id);
-        setWaiting(true);
-    } catch(err){
-        console.error(err)
+    if(difficulty===""){
+        try{
+            const res = await axios.post("http://localhost:4000/game/create", {host_user_id, color, opponent_color});
+            const game = res.data.game;
+            setGameId(game.id);
+            setWaiting(true);
+        } catch(err){
+            console.error(err)
+        }
+    } else{
+        try{
+            const res = await axios.post("http://localhost:4000/game/create/ia", {userId:host_user_id, color:color, difficulty:difficulty});
+            localStorage.setItem('game', JSON.stringify(res.data));
+            navigate("/game");
+        } catch(err){
+            console.error(err)
+        }
     }
   }
 
